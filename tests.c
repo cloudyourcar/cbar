@@ -75,7 +75,7 @@ START_TEST(test_cbar_external)
     static const struct cbar_line_config configs[] = {
         { "in0", CBAR_EXTERNAL, .external = { gpio_get, GPIO_IN0 } },
         { "in1", CBAR_EXTERNAL, .external = { gpio_get, GPIO_IN1 } },
-        { "in2", CBAR_EXTERNAL, .external = { gpio_get, GPIO_IN2 } },
+        { "in2", CBAR_EXTERNAL, .external = { gpio_get, GPIO_IN2, .invert = true } },
         { NULL }
     };
 
@@ -90,7 +90,7 @@ START_TEST(test_cbar_external)
     CBAR_INIT(cbar, configs);
     ck_assert_int_eq(cbar_value(&cbar, LINE_IN0), false);
     ck_assert_int_eq(cbar_value(&cbar, LINE_IN1), true);
-    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), false);
 
     /* flip the inputs */
     gpio_set(GPIO_IN0, true);
@@ -100,13 +100,13 @@ START_TEST(test_cbar_external)
     /* cbar should still see the old values */
     ck_assert_int_eq(cbar_value(&cbar, LINE_IN0), false);
     ck_assert_int_eq(cbar_value(&cbar, LINE_IN1), true);
-    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), false);
 
     /* new values should be visible after recalculation */
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_IN0), true);
     ck_assert_int_eq(cbar_value(&cbar, LINE_IN1), false);
-    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), true);
 }
 END_TEST
 

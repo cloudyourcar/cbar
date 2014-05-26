@@ -45,6 +45,8 @@ START_TEST(test_cbar)
 
     CBAR_DECLARE(cbar, configs);
     CBAR_INIT(cbar, configs);
+
+    cbar_dump(stdout, &cbar);
 }
 END_TEST
 

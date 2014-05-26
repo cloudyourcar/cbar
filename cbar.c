@@ -111,9 +111,9 @@ void cbar_recalculate(struct cbar *cbar, int delay)
                 }
             } break;
             case CROSSBAR_PERIODIC: {
-                line->timer.elapsed += delay;
-                if (line->timer.elapsed >= config->timer.period) {
-                    line->timer.elapsed = 0;
+                line->periodic.elapsed += delay;
+                if (line->periodic.elapsed >= config->periodic.period) {
+                    line->periodic.elapsed = 0;
                     line->value = 1;
                 }
             } break;
@@ -155,7 +155,7 @@ int cbar_value(struct cbar *cbar, int id)
     return line->value;
 }
 
-int cbar_pending(struct cbar *cbar, int id)
+bool cbar_pending(struct cbar *cbar, int id)
 {
     struct cbar_line *line = &cbar->lines[id];
     const struct cbar_line_config *config = &cbar->configs[id];
@@ -173,13 +173,13 @@ int cbar_pending(struct cbar *cbar, int id)
     return value;
 }
 
-void cbar_dump(struct cbar *cbar)
+void cbar_dump(FILE *stream, struct cbar *cbar)
 {
     for (int id=0; cbar->configs[id].type; id++) {
         struct cbar_line *line = &cbar->lines[id];
         const struct cbar_line_config *config = &cbar->configs[id];
 
-        printf("cbar: %s = %d\r\n", config->name, line->value);
+        fprintf(stream, "cbar: %s = %d\r\n", config->name, line->value);
     }
 }
 

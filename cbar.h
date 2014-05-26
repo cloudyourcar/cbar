@@ -29,38 +29,38 @@ enum cbar_line_type {
 struct cbar;
 
 struct cbar_line_config {
-    const char *name;
-    enum cbar_line_type type;
+    const char *name;               /**< Line name. Use NULL to terminate config block.  */
+    enum cbar_line_type type;       /**< Line type. */
 
     union {
         struct {
         } input;
         struct {
-            int (*get)(intptr_t);
-            intptr_t priv;
-            bool invert;
+            int (*get)(intptr_t);   /**< Callback for retrieving input state. */
+            intptr_t priv;          /**< Callback argument. */
+            bool invert;            /**< True if the input is active-low. */
         } external;
         struct {
-            int input;
-            int threshold_up;
-            int threshold_down;
+            int input;              /**< Input line ID. */
+            int threshold_up;       /**< Threshold for low->high transition. */
+            int threshold_down;     /**< Threshold for high->low transition. */
         } threshold;
         struct {
-            int input;
-            int timeout_up;
-            int timeout_down;
+            int input;              /**< Input line ID. */
+            int timeout_up;         /**< Timeout for low->high transition. */
+            int timeout_down;       /**< Timeout for high->low transition. */
         } debounce;
         struct {
         } request;
         struct {
-            int (*get)(struct cbar *cbar);
+            int (*get)(struct cbar *cbar);  /**< Callback for calculating line state. */
         } calculated;
         struct {
-            int input;
+            int input;              /**< Input line ID. */
         } monitor;
         struct {
-            int period;
-        } timer;
+            int period;             /**< Timer period in miliseconds. */
+        } periodic;
     };
 };
 
@@ -79,10 +79,13 @@ struct cbar_line {
         } monitor;
         struct {
             int elapsed;
-        } timer;
+        } periodic;
     };
 };
 
+/**
+ * @internal
+ */
 struct cbar {
     pthread_mutex_t mutex;
     struct cbar_line *lines;
@@ -90,18 +93,22 @@ struct cbar {
 };
 
 /**
- * Declare a cbar instance. Allocates memory for lines storage as well.
+ * Declare a cbar instance. Allocates memory for state storage as well.
  */
 #define CBAR_DECLARE(VAR, CONFIGS) \
     struct cbar VAR; \
     struct cbar_line VAR ## _lines[sizeof(CONFIGS)/sizeof(CONFIGS[0])-1];
 
+/**
+ * Initialize a cbar instance.
+ * @param VAR Variable name (NOTE: not a pointer).
+ * @param CONFIGS Configs variable name.
+ */
 #define CBAR_INIT(VAR, CONFIGS) \
     cbar_init(&VAR, CONFIGS, VAR ## _lines)
 
 /**
- * Initialize cbar instance.
- * @param cbar Instance to be initialized.
+ * @internal
  */
 void cbar_init(struct cbar *cbar, const struct cbar_line_config *configs, struct cbar_line *lines);
 
@@ -113,29 +120,42 @@ void cbar_init(struct cbar *cbar, const struct cbar_line_config *configs, struct
 void cbar_recalculate(struct cbar *cbar, int delay);
 
 /**
- * Feed cbar input line.
+ * Set cbar input line value.
+ *
+ * @param cbar Initialized cbar instance.
+ * @param id Line ID.
+ * @param value New value.
  */
 void cbar_input(struct cbar *cbar, int id, int value);
 
 /**
  * Read cbar line value.
+ * @param cbar Initialized cbar instance.
+ * @param id Line ID.
+ * @returns Current line value.
  */
 int cbar_value(struct cbar *cbar, int id);
 
 /**
  * Post a request.
+ * @param cbar Initialized cbar instance.
+ * @param id Line ID.
  */
 void cbar_post(struct cbar *cbar, int id);
 
 /**
  * Read and clear a "request pending" line.
+ * @param cbar Initialized cbar instance.
+ * @param id Line ID. Must be one of request, monitor, or periodic.
+ * @returns true if request was pending, false otherwise.
  */
-int cbar_pending(struct cbar *cbar, int id);
+bool cbar_pending(struct cbar *cbar, int id);
 
 /**
  * Dump the cbar state.
+ * @param cbar Initialized cbar instance.
  */
-void cbar_dump(struct cbar *cbar);
+void cbar_dump(FILE *stream, struct cbar *cbar);
 
 #endif
 

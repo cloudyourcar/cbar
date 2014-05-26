@@ -27,26 +27,26 @@ void cbar_init(struct cbar *cbar, const struct cbar_line_config *configs, struct
         line->value = 0;
 
         switch (config->type) {
-            case CROSSBAR_INPUT: {
+            case CBAR_INPUT: {
                 line->input.input_value = line->value;
             } break;
-            case CROSSBAR_EXTERNAL: {
+            case CBAR_EXTERNAL: {
             } break;
-            case CROSSBAR_THRESHOLD: {
+            case CBAR_THRESHOLD: {
             } break;
-            case CROSSBAR_DEBOUNCE: {
+            case CBAR_DEBOUNCE: {
                 /* Make the debouncer start counting immediately. */
                 line->debounce.value = INT_MIN;
             } break;
-            case CROSSBAR_REQUEST: {
+            case CBAR_REQUEST: {
             } break;
-            case CROSSBAR_CALCULATED: {
+            case CBAR_CALCULATED: {
             } break;
-            case CROSSBAR_MONITOR: {
+            case CBAR_MONITOR: {
                 /* Make the monitor fire immediately on the initial state. */
                 line->monitor.previous = INT_MIN;
             }
-            case CROSSBAR_PERIODIC: {
+            case CBAR_PERIODIC: {
                 line->periodic.elapsed = 0;
             } break;
         }
@@ -64,14 +64,14 @@ void cbar_recalculate(struct cbar *cbar, int delay)
         const struct cbar_line_config *config = &cbar->configs[id];
 
         switch (config->type) {
-            case CROSSBAR_INPUT: {
+            case CBAR_INPUT: {
                 line->value = line->input.input_value;
             } break;
-            case CROSSBAR_EXTERNAL: {
+            case CBAR_EXTERNAL: {
                 int input = config->external.get(config->external.priv);
                 line->value = config->external.invert ? !input : input;
             } break;
-            case CROSSBAR_THRESHOLD: {
+            case CBAR_THRESHOLD: {
                 int input = cbar->lines[config->debounce.input].value;
 
                 if (line->value)
@@ -79,7 +79,7 @@ void cbar_recalculate(struct cbar *cbar, int delay)
                 else
                     line->value = (input >= config->threshold.threshold_up);
             } break;
-            case CROSSBAR_DEBOUNCE: {
+            case CBAR_DEBOUNCE: {
                 int input = cbar->lines[config->debounce.input].value;
 
                 if (input != line->debounce.value) {
@@ -98,12 +98,12 @@ void cbar_recalculate(struct cbar *cbar, int delay)
                     }
                 }
             } break;
-            case CROSSBAR_REQUEST: {
+            case CBAR_REQUEST: {
             } break;
-            case CROSSBAR_CALCULATED: {
+            case CBAR_CALCULATED: {
                 line->value = config->calculated.get(cbar);
             } break;
-            case CROSSBAR_MONITOR: {
+            case CBAR_MONITOR: {
                 int input = cbar->lines[config->monitor.input].value;
                 if (input != line->monitor.previous) {
                     printf("cbar: [monitor] %s changed to %d\r\n", config->name, input);
@@ -111,7 +111,7 @@ void cbar_recalculate(struct cbar *cbar, int delay)
                     line->monitor.previous = input;
                 }
             } break;
-            case CROSSBAR_PERIODIC: {
+            case CBAR_PERIODIC: {
                 line->periodic.elapsed += delay;
                 if (line->periodic.elapsed >= config->periodic.period) {
                     line->periodic.elapsed = 0;
@@ -129,7 +129,7 @@ void cbar_input(struct cbar *cbar, int id, int value)
     struct cbar_line *line = &cbar->lines[id];
     const struct cbar_line_config *config = &cbar->configs[id];
 
-    assert(config->type == CROSSBAR_INPUT);
+    assert(config->type == CBAR_INPUT);
     printf("cbar: [input] %s set to %d\r\n", config->name, value);
     pthread_mutex_lock(&cbar->mutex);
     line->input.input_value = value;
@@ -141,7 +141,7 @@ void cbar_post(struct cbar *cbar, int id)
     struct cbar_line *line = &cbar->lines[id];
     const struct cbar_line_config *config = &cbar->configs[id];
 
-    assert(config->type == CROSSBAR_REQUEST);
+    assert(config->type == CBAR_REQUEST);
     printf("cbar: [request] %s posted\r\n", config->name);
     pthread_mutex_lock(&cbar->mutex);
     line->value = 1;
@@ -161,9 +161,9 @@ bool cbar_pending(struct cbar *cbar, int id)
     struct cbar_line *line = &cbar->lines[id];
     const struct cbar_line_config *config = &cbar->configs[id];
 
-    assert(config->type == CROSSBAR_REQUEST ||
-           config->type == CROSSBAR_MONITOR ||
-           config->type == CROSSBAR_PERIODIC);
+    assert(config->type == CBAR_REQUEST ||
+           config->type == CBAR_MONITOR ||
+           config->type == CBAR_PERIODIC);
     pthread_mutex_lock(&cbar->mutex);
     int value = line->value;
     line->value = 0;

@@ -45,7 +45,7 @@ START_TEST(test_cbar_input)
         LINE_VOLTAGE,
     };
     static const struct cbar_line_config configs[] = {
-        { "input0", CROSSBAR_INPUT },
+        { "input0", CBAR_INPUT },
         { NULL }
     };
 
@@ -73,9 +73,9 @@ START_TEST(test_cbar_external)
         LINE_IN2,
     };
     static const struct cbar_line_config configs[] = {
-        { "in0", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN0 } },
-        { "in1", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN1 } },
-        { "in2", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN2 } },
+        { "in0", CBAR_EXTERNAL, .external = { gpio_get, GPIO_IN0 } },
+        { "in1", CBAR_EXTERNAL, .external = { gpio_get, GPIO_IN1 } },
+        { "in2", CBAR_EXTERNAL, .external = { gpio_get, GPIO_IN2 } },
         { NULL }
     };
 

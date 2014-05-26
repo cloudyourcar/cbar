@@ -6,8 +6,8 @@
  * published by Sam Hocevar. See the COPYING file for more details.
  */
 
-#ifndef CROSSBAR_H
-#define CROSSBAR_H
+#ifndef CBAR_H
+#define CBAR_H
 
 #include <pthread.h>
 #include <stdbool.h>
@@ -16,14 +16,14 @@
 
 
 enum cbar_line_type {
-    CROSSBAR_INPUT = 1,
-    CROSSBAR_EXTERNAL,
-    CROSSBAR_THRESHOLD,
-    CROSSBAR_DEBOUNCE,
-    CROSSBAR_REQUEST,
-    CROSSBAR_CALCULATED,
-    CROSSBAR_MONITOR,
-    CROSSBAR_PERIODIC,
+    CBAR_INPUT = 1,
+    CBAR_EXTERNAL,
+    CBAR_THRESHOLD,
+    CBAR_DEBOUNCE,
+    CBAR_REQUEST,
+    CBAR_CALCULATED,
+    CBAR_MONITOR,
+    CBAR_PERIODIC,
 };
 
 struct cbar;

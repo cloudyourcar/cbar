@@ -1,7 +1,7 @@
 # the little crossbar
 
 ``cbar`` is a little library that makes writing business logic for embedded
-systems a little bit easier.
+systems much easier.
 
 ## The problem that needed solving
 
@@ -26,6 +26,7 @@ Sounds too good to be true? Here's some real code.
 ## Features
 
 * Written in ISO C99.
+* No dynamic memory allocation.
 * Small and lean - one source file and one header.
 * Complete with a test suite and static analysis.
 

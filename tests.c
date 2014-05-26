@@ -239,6 +239,21 @@ START_TEST(test_cbar_debounce)
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), false);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+
+    /* cause the line to flap below debounce threshold. it should behave like this: */
+    for (int i=0; i<4; i++) {
+        cbar_input(&cbar, LINE_IN0, true);
+        cbar_recalculate(&cbar, 500);
+        ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), true);
+        ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
+        ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+
+        cbar_input(&cbar, LINE_IN0, false);
+        cbar_recalculate(&cbar, 500);
+        ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), true);
+        ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
+        ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+    }
 }
 END_TEST
 

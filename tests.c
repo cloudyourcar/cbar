@@ -35,9 +35,20 @@ int gpio_get(intptr_t id)
 
 START_TEST(test_cbar)
 {
+    static const struct cbar_line_config configs[] = {
+        { "in0", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN0 } },
+        { "in1", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN1 } },
+        { "in2", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN2 } },
+        { "in3", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN3 } },
+        { NULL }
+    };
+
+    CBAR_DECLARE(cbar, configs);
+    CBAR_INIT(cbar, configs);
 }
 END_TEST
 
+/****************************************************************************/
 
 Suite *cbar_suite(void)
 {

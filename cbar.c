@@ -45,7 +45,7 @@ void cbar_init(struct cbar *cbar, const struct cbar_line_config *configs, struct
             case CBAR_MONITOR: {
                 /* Make the monitor fire immediately on the initial state. */
                 line->monitor.previous = INT_MIN;
-            }
+            } break;
             case CBAR_PERIODIC: {
                 line->periodic.elapsed = 0;
             } break;

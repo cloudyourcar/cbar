@@ -293,8 +293,48 @@ END_TEST
 
 /****************************************************************************/
 
+enum calculated_lines {
+    LINE_ENGINE_RUNNING,
+    LINE_IN_MOTION,
+    LINE_CAR_IDLING,
+};
+
+static int calculate_idling(struct cbar *cbar)
+{
+    return  cbar_value(cbar, LINE_ENGINE_RUNNING) &&
+           !cbar_value(cbar, LINE_IN_MOTION);
+}
+
 START_TEST(test_cbar_calculated)
 {
+    static struct cbar_line_config configs[] = {
+        { "engine_running", CBAR_INPUT },
+        { "in_motion",      CBAR_INPUT },
+        { "car_idling",     CBAR_CALCULATED, .calculated = { calculate_idling } },
+        { NULL }
+    };
+
+    CBAR_DECLARE(cbar, configs);
+    CBAR_INIT(cbar, configs);
+
+    /* initially everything is zero */
+    ck_assert_int_eq(cbar_value(&cbar, LINE_ENGINE_RUNNING), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN_MOTION), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_CAR_IDLING), false);
+
+    /* start the engine. we're now idling. */
+    cbar_input(&cbar, LINE_ENGINE_RUNNING, true);
+    cbar_recalculate(&cbar, 100);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_ENGINE_RUNNING), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN_MOTION), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_CAR_IDLING), true);
+
+    /* start moving. we're no longer idling. */
+    cbar_input(&cbar, LINE_IN_MOTION, true);
+    cbar_recalculate(&cbar, 100);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_ENGINE_RUNNING), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN_MOTION), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_CAR_IDLING), false);
 }
 END_TEST
 

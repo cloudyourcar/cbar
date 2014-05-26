@@ -408,6 +408,42 @@ END_TEST
 
 START_TEST(test_cbar_periodic)
 {
+    enum lines {
+        LINE_TICK,
+    };
+    static const struct cbar_line_config configs[] = {
+        { "tick", CBAR_PERIODIC, .periodic = { 1000 } },
+        { NULL }
+    };
+
+    CBAR_DECLARE(cbar, configs);
+    CBAR_INIT(cbar, configs);
+
+    /* starts as inactive */
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), false);
+
+    /* some time passes... */
+    cbar_recalculate(&cbar, 500);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), false);
+    cbar_recalculate(&cbar, 499);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), false);
+    cbar_recalculate(&cbar, 1);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), true);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), false);
+
+    /* activations don't stack. */
+    cbar_recalculate(&cbar, 1000);
+    cbar_recalculate(&cbar, 1000);
+    cbar_recalculate(&cbar, 1000);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), true);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), false);
+
+    /* time doesn't stack as well, to prevent activating too soon. */
+    cbar_recalculate(&cbar, 1500);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), true);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), false);
+    cbar_recalculate(&cbar, 500);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_TICK), false);
 }
 END_TEST
 

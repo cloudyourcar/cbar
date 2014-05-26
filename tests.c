@@ -261,6 +261,33 @@ END_TEST
 
 START_TEST(test_cbar_request)
 {
+    enum lines {
+        LINE_REQ1,
+        LINE_REQ2,
+    };
+    static struct cbar_line_config configs[] = {
+        { "req1", CBAR_REQUEST },
+        { "req2", CBAR_REQUEST },
+        { NULL }
+    };
+
+    CBAR_DECLARE(cbar, configs);
+    CBAR_INIT(cbar, configs);
+
+    /* request are initially non-pending */
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_REQ1), false);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_REQ2), false);
+
+    /* send some, should fire once */
+    cbar_post(&cbar, LINE_REQ1);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_REQ1), true);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_REQ1), false);
+
+    /* request are non-counting. */
+    cbar_post(&cbar, LINE_REQ2);
+    cbar_post(&cbar, LINE_REQ2);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_REQ2), true);
+    ck_assert_int_eq(cbar_pending(&cbar, LINE_REQ2), false);
 }
 END_TEST
 

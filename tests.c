@@ -16,29 +16,6 @@
 
 /****************************************************************************/
 
-enum gpio_pin {
-    GPIO_IN0,
-    GPIO_IN1,
-    GPIO_IN2,
-    N_GPIO_PINS
-};
-
-static int gpio_pins[N_GPIO_PINS];
-
-int gpio_get(intptr_t id)
-{
-    ck_assert_int_ge(id, 0);
-    ck_assert_int_lt(id, N_GPIO_PINS);
-    return gpio_pins[id];
-}
-
-void gpio_set(int id, bool value)
-{
-    gpio_pins[id] = value;
-}
-
-/****************************************************************************/
-
 START_TEST(test_cbar_input)
 {
     enum lines {
@@ -64,6 +41,27 @@ START_TEST(test_cbar_input)
 END_TEST
 
 /****************************************************************************/
+
+enum gpio_pin {
+    GPIO_IN0,
+    GPIO_IN1,
+    GPIO_IN2,
+    N_GPIO_PINS
+};
+
+static int gpio_pins[N_GPIO_PINS];
+
+int gpio_get(intptr_t id)
+{
+    ck_assert_int_ge(id, 0);
+    ck_assert_int_lt(id, N_GPIO_PINS);
+    return gpio_pins[id];
+}
+
+void gpio_set(int id, bool value)
+{
+    gpio_pins[id] = value;
+}
 
 START_TEST(test_cbar_external)
 {
@@ -265,7 +263,7 @@ START_TEST(test_cbar_request)
         LINE_REQ1,
         LINE_REQ2,
     };
-    static struct cbar_line_config configs[] = {
+    static const struct cbar_line_config configs[] = {
         { "req1", CBAR_REQUEST },
         { "req2", CBAR_REQUEST },
         { NULL }
@@ -307,7 +305,7 @@ static int calculate_idling(struct cbar *cbar)
 
 START_TEST(test_cbar_calculated)
 {
-    static struct cbar_line_config configs[] = {
+    static const struct cbar_line_config configs[] = {
         { "engine_running", CBAR_INPUT },
         { "in_motion",      CBAR_INPUT },
         { "car_idling",     CBAR_CALCULATED, .calculated = { calculate_idling } },
@@ -340,8 +338,69 @@ END_TEST
 
 /****************************************************************************/
 
+static int temperature;
+static int get_temperature(intptr_t priv)
+{
+    return temperature;
+}
+
 START_TEST(test_cbar_monitor)
 {
+    enum lines {
+        INPUT_SUPPLY_VOLTAGE,
+        INPUT_GPS_FIX,
+        INPUT_TEMPERATURE,
+
+        LINE_POWER_AVAILABLE,
+        LINE_THERMAL_ALARM,
+
+        MONITOR_POWER,
+        MONITOR_GPS,
+        MONITOR_THERMAL,
+    };
+    static const struct cbar_line_config configs[] = {
+        { "supply_voltage",  CBAR_INPUT },
+        { "gps_fix",         CBAR_INPUT },
+        { "temperature",     CBAR_EXTERNAL, .external = { get_temperature, 0 } },
+
+        { "power_available", CBAR_THRESHOLD, .threshold = { INPUT_SUPPLY_VOLTAGE, 3800, 3800 } },
+        { "thermal_alarm",   CBAR_THRESHOLD, .threshold = { INPUT_TEMPERATURE, 50, 45 } },
+
+        { "monitor_power",   CBAR_MONITOR, .monitor = { LINE_POWER_AVAILABLE } },
+        { "monitor_gps",     CBAR_MONITOR, .monitor = { INPUT_GPS_FIX } },
+        { "monitor_thermal", CBAR_MONITOR, .monitor = { LINE_THERMAL_ALARM } },
+
+        { NULL }
+    };
+
+    CBAR_DECLARE(cbar, configs);
+    CBAR_INIT(cbar, configs);
+
+    /* all monitors should be pending after first recalculation. */
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_POWER), true);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_POWER), false);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_GPS), true);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_GPS), false);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_THERMAL), true);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_THERMAL), false);
+
+    /* cause a temperature raise, triggering a monitor */
+    temperature = 60;
+    cbar_recalculate(&cbar, 100);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_THERMAL), true);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_THERMAL), false);
+
+    /* changing line state causes a request as well */
+    cbar_input(&cbar, INPUT_GPS_FIX, true);
+    cbar_recalculate(&cbar, 100);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_GPS), true);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_GPS), false);
+
+    /* ...but a glitch doesn't. */
+    cbar_input(&cbar, INPUT_GPS_FIX, false);
+    cbar_input(&cbar, INPUT_GPS_FIX, true);
+    cbar_recalculate(&cbar, 100);
+    ck_assert_int_eq(cbar_pending(&cbar, MONITOR_GPS), false);
 }
 END_TEST
 

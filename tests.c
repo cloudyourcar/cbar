@@ -117,10 +117,14 @@ START_TEST(test_cbar_threshold)
     enum lines {
         LINE_VOLTAGE,
         LINE_VOLTAGE_OK,
+        LINE_VOLTAGE_GE,
     };
     const struct cbar_line_config configs[] = {
         { "voltage",    CBAR_INPUT },
+        /* with hysteresis */
         { "voltage_ok", CBAR_THRESHOLD, .threshold = { LINE_VOLTAGE, 1050, 950 } },
+        /* without hysteresis */
+        { "voltage_ge", CBAR_THRESHOLD, .threshold = { LINE_VOLTAGE, 1000, 1000 } },
         { NULL }
     };
 
@@ -154,6 +158,16 @@ START_TEST(test_cbar_threshold)
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), false);
+
+    /* lack of hysteresis shouldn't cause flapping on constant value */
+    cbar_input(&cbar, LINE_VOLTAGE, 1000);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_GE), false);
+    cbar_recalculate(&cbar, 0);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_GE), true);
+    cbar_recalculate(&cbar, 0);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_GE), true);
+    cbar_recalculate(&cbar, 0);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_GE), true);
 }
 END_TEST
 

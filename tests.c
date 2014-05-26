@@ -39,7 +39,14 @@ void gpio_set(int id, bool value)
 
 /****************************************************************************/
 
-START_TEST(test_cbar)
+START_TEST(test_cbar_input)
+{
+}
+END_TEST
+
+/****************************************************************************/
+
+START_TEST(test_cbar_external)
 {
     enum lines {
         LINE_IN0,
@@ -86,13 +93,62 @@ END_TEST
 
 /****************************************************************************/
 
+START_TEST(test_cbar_threshold)
+{
+}
+END_TEST
+
+/****************************************************************************/
+
+START_TEST(test_cbar_debounce)
+{
+}
+END_TEST
+
+/****************************************************************************/
+
+START_TEST(test_cbar_request)
+{
+}
+END_TEST
+
+/****************************************************************************/
+
+START_TEST(test_cbar_calculated)
+{
+}
+END_TEST
+
+/****************************************************************************/
+
+START_TEST(test_cbar_monitor)
+{
+}
+END_TEST
+
+/****************************************************************************/
+
+START_TEST(test_cbar_periodic)
+{
+}
+END_TEST
+
+/****************************************************************************/
+
 Suite *cbar_suite(void)
 {
     Suite *s = suite_create("cbar");
     TCase *tc;
 
     tc = tcase_create("cbar");
-    tcase_add_test(tc, test_cbar);
+    tcase_add_test(tc, test_cbar_input);
+    tcase_add_test(tc, test_cbar_external);
+    tcase_add_test(tc, test_cbar_threshold);
+    tcase_add_test(tc, test_cbar_debounce);
+    tcase_add_test(tc, test_cbar_request);
+    tcase_add_test(tc, test_cbar_calculated);
+    tcase_add_test(tc, test_cbar_monitor);
+    tcase_add_test(tc, test_cbar_periodic);
     suite_add_tcase(s, tc);
 
     return s;

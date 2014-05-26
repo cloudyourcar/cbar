@@ -20,7 +20,6 @@ enum gpio_pin {
     GPIO_IN0,
     GPIO_IN1,
     GPIO_IN2,
-    GPIO_IN3,
     N_GPIO_PINS
 };
 
@@ -28,6 +27,8 @@ static int gpio_pins[N_GPIO_PINS];
 
 int gpio_get(intptr_t id)
 {
+    ck_assert_int_ge(id, 0);
+    ck_assert_int_lt(id, N_GPIO_PINS);
     return gpio_pins[id];
 }
 
@@ -44,7 +45,6 @@ START_TEST(test_cbar)
         LINE_IN0,
         LINE_IN1,
         LINE_IN2,
-        LINE_IN3,
     };
     static const struct cbar_line_config configs[] = {
         { "in0", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN0 } },

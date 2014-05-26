@@ -31,22 +31,56 @@ int gpio_get(intptr_t id)
     return gpio_pins[id];
 }
 
+void gpio_set(int id, bool value)
+{
+    gpio_pins[id] = value;
+}
+
 /****************************************************************************/
 
 START_TEST(test_cbar)
 {
+    enum lines {
+        LINE_IN0,
+        LINE_IN1,
+        LINE_IN2,
+        LINE_IN3,
+    };
     static const struct cbar_line_config configs[] = {
         { "in0", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN0 } },
         { "in1", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN1 } },
         { "in2", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN2 } },
-        { "in3", CROSSBAR_EXTERNAL, .external = { gpio_get, GPIO_IN3 } },
         { NULL }
     };
 
     CBAR_DECLARE(cbar, configs);
-    CBAR_INIT(cbar, configs);
 
-    cbar_dump(stdout, &cbar);
+    /* set initial input states */
+    gpio_set(GPIO_IN0, false);
+    gpio_set(GPIO_IN1, true);
+    gpio_set(GPIO_IN2, true);
+
+    /* make sure cbar reads them */
+    CBAR_INIT(cbar, configs);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN0), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN1), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), true);
+
+    /* flip the inputs */
+    gpio_set(GPIO_IN0, true);
+    gpio_set(GPIO_IN1, false);
+    gpio_set(GPIO_IN2, false);
+
+    /* cbar should still see the old values */
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN0), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN1), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), true);
+
+    /* new values should be visible after recalculation */
+    cbar_recalculate(&cbar, 0);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN0), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN1), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_IN2), false);
 }
 END_TEST
 

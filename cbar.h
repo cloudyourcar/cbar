@@ -71,6 +71,9 @@ struct cbar_line {
     int value;
     union {
         struct {
+            int input_value;
+        } input;
+        struct {
             int value;
             int timer;
         } debounce;

@@ -41,6 +41,25 @@ void gpio_set(int id, bool value)
 
 START_TEST(test_cbar_input)
 {
+    enum lines {
+        LINE_VOLTAGE,
+    };
+    static const struct cbar_line_config configs[] = {
+        { "input0", CROSSBAR_INPUT },
+        { NULL }
+    };
+
+    CBAR_DECLARE(cbar, configs);
+    CBAR_INIT(cbar, configs);
+
+    /* inputs start at zero */
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE), 0);
+
+    /* input changes don't take effect until a recalculation */
+    cbar_input(&cbar, LINE_VOLTAGE, 3185);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE), 0);
+    cbar_recalculate(&cbar, 0);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE), 3185);
 }
 END_TEST
 

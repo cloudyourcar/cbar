@@ -9,6 +9,7 @@
 #include "cbar.h"
 
 #include <assert.h>
+#include <limits.h>
 
 
 void cbar_init(struct cbar *cbar, const struct cbar_line_config *configs, struct cbar_line *lines)
@@ -22,31 +23,31 @@ void cbar_init(struct cbar *cbar, const struct cbar_line_config *configs, struct
         struct cbar_line *line = &cbar->lines[id];
         const struct cbar_line_config *config = &cbar->configs[id];
 
-        // All lines are initially at zero. This is by design. ;)
+        /* All lines are initially at zero. */
         line->value = 0;
 
         switch (config->type) {
             case CROSSBAR_INPUT: {
+                line->input.input_value = line->value;
             } break;
             case CROSSBAR_EXTERNAL: {
             } break;
             case CROSSBAR_THRESHOLD: {
             } break;
             case CROSSBAR_DEBOUNCE: {
-                // Debouncer starts in an "impossible" state so that it starts
-                // counting as soon as the subsystem starts.
-                // FIXME: What about oscillations?
-                line->debounce.value = -1;
+                /* Make the debouncer start counting immediately. */
+                line->debounce.value = INT_MIN;
             } break;
             case CROSSBAR_REQUEST: {
             } break;
             case CROSSBAR_CALCULATED: {
             } break;
             case CROSSBAR_MONITOR: {
-                // Fire monitors immediately to prevent lost state transitions.
-                line->monitor.previous = -1;
+                /* Make the monitor fire immediately on the initial state. */
+                line->monitor.previous = INT_MIN;
             }
             case CROSSBAR_PERIODIC: {
+                line->periodic.elapsed = 0;
             } break;
         }
     }
@@ -64,7 +65,7 @@ void cbar_recalculate(struct cbar *cbar, int delay)
 
         switch (config->type) {
             case CROSSBAR_INPUT: {
-                /* no-op. */
+                line->value = line->input.input_value;
             } break;
             case CROSSBAR_EXTERNAL: {
                 int input = config->external.get(config->external.priv);
@@ -131,7 +132,7 @@ void cbar_input(struct cbar *cbar, int id, int value)
     assert(config->type == CROSSBAR_INPUT);
     printf("cbar: [input] %s set to %d\r\n", config->name, value);
     pthread_mutex_lock(&cbar->mutex);
-    line->value = value;
+    line->input.input_value = value;
     pthread_mutex_unlock(&cbar->mutex);
 }
 

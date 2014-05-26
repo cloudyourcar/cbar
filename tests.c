@@ -143,14 +143,14 @@ START_TEST(test_cbar_threshold)
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
 
-    /* set it above lower threshold, should stay high */
-    cbar_input(&cbar, LINE_VOLTAGE, 951);
+    /* set it to lower threshold, should stay high */
+    cbar_input(&cbar, LINE_VOLTAGE, 950);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
 
-    /* set it to lower threshold, should go low again */
-    cbar_input(&cbar, LINE_VOLTAGE, 950);
+    /* set it below lower threshold, should go low again */
+    cbar_input(&cbar, LINE_VOLTAGE, 949);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), false);

@@ -29,6 +29,7 @@ Sounds too good to be true? Here's some real code.
 * No dynamic memory allocation.
 * Small and lean - one source file and one header.
 * Complete with a test suite and static analysis.
+* Thread-safe.
 
 ## Requirements
 

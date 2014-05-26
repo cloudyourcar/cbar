@@ -8,37 +8,13 @@
 
 #include "cbar.h"
 
-#include <stdio.h>
 #include <assert.h>
-#include <pthread.h>
 
 
-struct cbar {
-    pthread_mutex_t mutex;
-    struct cbar_line *lines;
-    const struct cbar_line_config *configs;
-};
-
-struct cbar_line {
-    int value;
-    union {
-        struct {
-            int value;
-            int timer;
-        } debounce;
-        struct {
-            int previous;
-        } monitor;
-        struct {
-            int elapsed;
-        } timer;
-    };
-};
-
-
-void cbar_init(struct cbar *cbar, struct cbar_line_config *configs)
+void cbar_init(struct cbar *cbar, const struct cbar_line_config *configs, struct cbar_line *lines)
 {
     cbar->configs = configs;
+    cbar->lines = lines;
 
     pthread_mutex_init(&cbar->mutex, NULL);
 

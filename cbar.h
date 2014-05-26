@@ -9,11 +9,11 @@
 #ifndef CROSSBAR_H
 #define CROSSBAR_H
 
+#include <pthread.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
-
-struct cbar;
 
 enum cbar_line_type {
     CROSSBAR_INPUT = 1,
@@ -25,6 +25,8 @@ enum cbar_line_type {
     CROSSBAR_MONITOR,
     CROSSBAR_PERIODIC,
 };
+
+struct cbar;
 
 struct cbar_line_config {
     const char *name;
@@ -63,9 +65,45 @@ struct cbar_line_config {
 };
 
 /**
- * Initialize cbar instance.
+ * @internal
  */
-void cbar_init(struct cbar *cbar, struct cbar_line_config *configs);
+struct cbar_line {
+    int value;
+    union {
+        struct {
+            int value;
+            int timer;
+        } debounce;
+        struct {
+            int previous;
+        } monitor;
+        struct {
+            int elapsed;
+        } timer;
+    };
+};
+
+struct cbar {
+    pthread_mutex_t mutex;
+    struct cbar_line *lines;
+    const struct cbar_line_config *configs;
+};
+
+/**
+ * Declare a cbar instance. Allocates memory for lines storage as well.
+ */
+#define CBAR_DECLARE(VAR, CONFIGS) \
+    struct cbar VAR; \
+    struct cbar_line VAR ## _lines[sizeof(CONFIGS)/sizeof(CONFIGS[0])-1];
+
+#define CBAR_INIT(VAR, CONFIGS) \
+    cbar_init(&VAR, CONFIGS, VAR ## _lines)
+
+/**
+ * Initialize cbar instance.
+ * @param cbar Instance to be initialized.
+ */
+void cbar_init(struct cbar *cbar, const struct cbar_line_config *configs, struct cbar_line *lines);
 
 /**
  * Perform one round of debouncing/calculation of states.

@@ -14,6 +14,25 @@
 #include "cbar.h"
 
 
+/****************************************************************************/
+
+enum gpio_pin {
+    GPIO_IN0,
+    GPIO_IN1,
+    GPIO_IN2,
+    GPIO_IN3,
+    N_GPIO_PINS
+};
+
+static int gpio_pins[N_GPIO_PINS];
+
+int gpio_get(intptr_t id)
+{
+    return gpio_pins[id];
+}
+
+/****************************************************************************/
+
 START_TEST(test_cbar)
 {
 }

@@ -175,6 +175,70 @@ END_TEST
 
 START_TEST(test_cbar_debounce)
 {
+    enum lines {
+        LINE_IN0,
+        LINE_DEBOUNCE_A,
+        LINE_DEBOUNCE_B,
+        LINE_DEBOUNCE_C,
+    };
+    static const struct cbar_line_config configs[] = {
+        { "in0", CBAR_INPUT },
+        { "a",   CBAR_DEBOUNCE, .debounce = { LINE_IN0,    0, 1000 } },
+        { "b",   CBAR_DEBOUNCE, .debounce = { LINE_IN0, 1000, 1000 } },
+        { "c",   CBAR_DEBOUNCE, .debounce = { LINE_IN0, 1000,    0 } },
+        { NULL }
+    };
+
+    CBAR_DECLARE(cbar, configs);
+    CBAR_INIT(cbar, configs);
+
+    /* all values should be zero initially */
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+
+    /* set the input to a new value. nothing should change yet. */
+    cbar_input(&cbar, LINE_IN0, true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+
+    /* pass no time. the first debounce should fire immediately. */
+    cbar_recalculate(&cbar, 0);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+
+    /* pass almost enough time. nothing should fire right now. */
+    cbar_recalculate(&cbar, 999);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+
+    /* pass the remaining. the other ones should fire now too. */
+    cbar_recalculate(&cbar, 1);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), true);
+
+    /* go back down after a while. the third one should fire immediately. */
+    cbar_input(&cbar, LINE_IN0, false);
+    cbar_recalculate(&cbar, 5000);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+
+    /* pass some time. nothing should change yet. */
+    cbar_recalculate(&cbar, 500);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
+
+    /* go back down. */
+    cbar_recalculate(&cbar, 500);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
 }
 END_TEST
 

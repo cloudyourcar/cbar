@@ -10,6 +10,7 @@
 #define CROSSBAR_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 
 struct cbar;
@@ -33,8 +34,8 @@ struct cbar_line_config {
         struct {
         } input;
         struct {
-            int (*get)(void *priv);
-            void *priv;
+            int (*get)(intptr_t);
+            intptr_t priv;
             bool invert;
         } external;
         struct {

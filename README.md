@@ -147,8 +147,8 @@ with a cheap-feeling Chinese-like contraption instead of an Apple-esque piece
 of art.
 
 Decide for yourself. Our logic router is not perfect, since it was written
-for our purposes - but even if it just inspires you or ignites your imagination
-- that's all the better.
+for our purposes - but even if it just inspires you or ignites your
+imagination - that's all the better.
 
 ## Features
 

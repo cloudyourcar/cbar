@@ -106,6 +106,7 @@ static int calculate_led_color(struct cbar *cbar)
     return LED_GREEN;
 }
 
+/* And here's the main loop. */
 while (true) {
     sleep_ms(100);
 

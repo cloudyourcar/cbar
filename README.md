@@ -185,9 +185,7 @@ typing ``make``.
 
 ## Licensing
 
+``cbar`` was written by Kosma Moczek &lt;kosma@cloudyourcar.com&gt; at Cloud Your Car.
 ``cbar`` is open source software; see ``COPYING`` for amusement. Email me if the
 license bothers you and I'll happily re-license under anything else under the sun.
 
-## Author
-
-``cbar`` was written by Kosma Moczek &lt;kosma@cloudyourcar.com&gt; at Cloud Your Car.

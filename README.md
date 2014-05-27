@@ -3,7 +3,7 @@
 ``cbar`` is a little library that makes writing business logic for embedded
 systems much easier.
 
-## Problem that needed solving
+## Problem that needs solving
 
 Imagine your typical embedded C project: there are dozens of inputs and
 outputs, some GPIO, other analog, some half-assed timers, ifs, switches and
@@ -43,12 +43,12 @@ from drivers, where it doesn't belong.
 ```c
 /* First, enumerate your lines. */
 enum {
-    INPUT_VOLTAGE_CAR,
-    INPUT_VOLTAGE_BATTERY,
-    INPUT_TEMPERATURE,
-    INPUT_DEVICE_INSERTED,
+    IN_VOLTAGE_CAR,
+    IN_VOLTAGE_BATTERY,
+    IN_TEMPERATURE,
+    IN_DEVICE_INSERTED,
 
-    INPUT_GPS_FIX,
+    IN_GPS_FIX,
 
     LINE_POWER_AVAILABLE_RAW,
     LINE_ENGINE_RUNNING_RAW,
@@ -67,29 +67,29 @@ enum {
 /* Now define the inputs, outputs and their relationships. */
 static const struct cbar_line_config configs[] = {
     /* Some ADC and GPIO inputs: */
-    { "in_voltage_car",     CBAR_EXTERNAL, .external = { adc_measure, ADC_CHANNEL_VCAR  } },
-    { "in_voltage_battery", CBAR_EXTERNAL, .external = { adc_measure, ADC_CHANNEL_VBATT } },
-    { "in_temperature",     CBAR_EXTERNAL, .external = { adc_measure, ADC_CHANNEL_TEMP  } },
-    { "in_device_inserted", CBAR_EXTERNAL, .external = { gpio_get_state, GPIO_PIN_INSDET } },
+    { "in_voltage_car",         CBAR_EXTERNAL, .external = { adc_measure, ADC_CHANNEL_VCAR  } },
+    { "in_voltage_battery",     CBAR_EXTERNAL, .external = { adc_measure, ADC_CHANNEL_VBATT } },
+    { "in_temperature",         CBAR_EXTERNAL, .external = { adc_measure, ADC_CHANNEL_TEMP  } },
+    { "in_device_inserted",     CBAR_EXTERNAL, .external = { gpio_get_state, GPIO_PIN_INSDET } },
 
     /* Inputs coming from other software modules: */
-    { "in_gps_fix",         CBAR_INPUT },
+    { "in_gps_fix",             CBAR_INPUT },
 
     /* Thresholds on analog inputs: */
-    { "th_power_available", CBAR_THRESHOLD, .threshold = { LINE_VOLTAGE_CAR, 11000, 10000 } },
-    { "th_engine_running",  CBAR_THRESHOLD, .threshold = { LINE_VOLTAGE_CAR, 13300, 13100 } },
+    { "power_available_raw",    CBAR_THRESHOLD, .threshold = { IN_VOLTAGE_CAR, 11000, 10000 } },
+    { "engine_running"_raw,     CBAR_THRESHOLD, .threshold = { IN_VOLTAGE_CAR, 13300, 13100 } },
 
     /* Apply some debouncing to the input lines: */
-    { "device_inserted",    CBAR_DEBOUNCE, .debounce = { INPUT_DEVICE_INSERTED,    1000,  1000 } },
-    { "power_available",    CBAR_DEBOUNCE, .debounce = { LINE_POWER_AVAILABLE_RAW, 1000,  1000 } },
-    { "engine_running",     CBAR_DEBOUNCE, .debounce = { LINE_ENGINE_RUNNING_RAW,     0, 10000 } },
+    { "device_inserted",        CBAR_DEBOUNCE, .debounce = { IN_DEVICE_INSERTED,    1000,  1000 } },
+    { "power_available",        CBAR_DEBOUNCE, .debounce = { LINE_POWER_AVAILABLE_RAW, 1000,  1000 } },
+    { "engine_running",         CBAR_DEBOUNCE, .debounce = { LINE_ENGINE_RUNNING_RAW,     0, 10000 } },
 
     /* Complex values can be calculated using external callbacks like this: */
-    { "led_color",          CBAR_CALCULATED, .calculated = { calculate_led_color } },
+    { "led_color",              CBAR_CALCULATED, .calculated = { calculate_led_color } },
 
     /* Listening for state changes is as simple as: */
-    { "monitor_gpx_fix",    CBAR_MONITOR, .monitor = { LINE_GPS_FIX } },
-    { "monitor_led_color",  CBAR_MONITOR, .monitor = { LINE_LED_COLOR } },
+    { "monitor_gpx_fix",        CBAR_MONITOR, .monitor = { IN_GPS_FIX } },
+    { "monitor_led_color",      CBAR_MONITOR, .monitor = { LINE_LED_COLOR } },
     { "monitor_engine_running", CBAR_MONITOR, .monitor = { LINE_ENGINE_RUNNING } },
 
     { NULL }
@@ -101,7 +101,7 @@ static int calculate_led_color(struct cbar *cbar)
         return LED_BLACK;
     if (cbar_value(cbar, LINE_ENGINE_RUNNING) == false)
         return LED_RED;
-    if (cbar_value(cbar, LINE_GPS_FIX) == false)
+    if (cbar_value(cbar, IN_GPS_FIX) == false)
         return LED_BLUE;
     return LED_GREEN;
 }

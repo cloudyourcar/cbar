@@ -77,7 +77,7 @@ static const struct cbar_line_config configs[] = {
 
     /* Thresholds on analog inputs: */
     { "power_available_raw",    CBAR_THRESHOLD, .threshold = { IN_VOLTAGE_CAR, 11000, 10000 } },
-    { "engine_running"_raw,     CBAR_THRESHOLD, .threshold = { IN_VOLTAGE_CAR, 13300, 13100 } },
+    { "engine_running_raw,      CBAR_THRESHOLD, .threshold = { IN_VOLTAGE_CAR, 13300, 13100 } },
 
     /* Apply some debouncing to the input lines: */
     { "device_inserted",        CBAR_DEBOUNCE, .debounce = { IN_DEVICE_INSERTED,    1000,  1000 } },

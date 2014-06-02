@@ -227,13 +227,13 @@ START_TEST(test_cbar_debounce)
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
 
     /* pass some time. nothing should change yet. */
-    cbar_recalculate(&cbar, 500);
+    cbar_recalculate(&cbar, 250);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), true);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), true);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
 
     /* go back down. */
-    cbar_recalculate(&cbar, 500);
+    cbar_recalculate(&cbar, 750);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_A), false);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);

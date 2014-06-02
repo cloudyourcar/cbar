@@ -83,21 +83,21 @@ void cbar_recalculate(struct cbar *cbar, int delay)
                 int input = cbar->lines[config->debounce.input].value;
                 int timeout = input ? config->debounce.timeout_up : config->debounce.timeout_down;
 
-                if (input != line->debounce.value) {
+                if (line->debounce.value != input) {
                     // Line state just changed. Reset debounce timer.
                     printf("cbar: [debounce] %s going towards %d\r\n", config->name, input);
                     line->debounce.value = input;
                     line->debounce.timer = 0;
-                } else if (input != line->value) {
+                } else if (line->debounce.value != line->value) {
                     // Line state is stabilizing. Bump debounce timer.
                     //printf("cbar: [debounce] %s clocked %d vs %d\r\n", config->name, line->debounce.timer, timeout);
                     line->debounce.timer += delay;
                 }
 
-                if (line->value != line->debounce.value && line->debounce.timer >= timeout) {
+                if (line->debounce.value != line->value && line->debounce.timer >= timeout) {
                     // Line just stabilized. Register the change.
                     printf("cbar: [debounce] %s stable at %d\r\n", config->name, input);
-                    line->value = input;
+                    line->value = line->debounce.value;
                 }
             } break;
             case CBAR_REQUEST: {

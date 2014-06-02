@@ -94,8 +94,8 @@ void cbar_recalculate(struct cbar *cbar, int delay)
                     line->debounce.timer += delay;
                 }
 
-                if (line->debounce.timer >= timeout) {
-                    // Line is stable. Register the change.
+                if (line->value != line->debounce.value && line->debounce.timer >= timeout) {
+                    // Line just stabilized. Register the change.
                     printf("cbar: [debounce] %s stable at %d\r\n", config->name, input);
                     line->value = input;
                 }

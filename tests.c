@@ -238,6 +238,14 @@ START_TEST(test_cbar_debounce)
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_B), false);
     ck_assert_int_eq(cbar_value(&cbar, LINE_DEBOUNCE_C), false);
 
+    /* fire a few times; should not printf "stable" repeatedly.
+     * NOTE: no unit test here; just look at the logs. */
+    printf("<this section should be empty>\n");
+    cbar_recalculate(&cbar, 1000);
+    cbar_recalculate(&cbar, 1000);
+    cbar_recalculate(&cbar, 1000);
+    printf("</this section should be empty>\n");
+
     /* cause the line to flap below debounce threshold. it should behave like this: */
     for (int i=0; i<4; i++) {
         cbar_input(&cbar, LINE_IN0, true);

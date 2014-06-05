@@ -132,7 +132,7 @@ void cbar_input(struct cbar *cbar, int id, int value)
     const struct cbar_line_config *config = &cbar->configs[id];
 
     assert(config->type == CBAR_INPUT);
-    printf("cbar: [input] %s set to %d\r\n", config->name, value);
+    //printf("cbar: [input] %s set to %d\r\n", config->name, value);
     pthread_mutex_lock(&cbar->mutex);
     line->input.input_value = value;
     pthread_mutex_unlock(&cbar->mutex);

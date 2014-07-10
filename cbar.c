@@ -85,7 +85,7 @@ void cbar_recalculate(struct cbar *cbar, int delay)
 
                 if (line->debounce.value != input) {
                     // Line state just changed. Reset debounce timer.
-                    printf("cbar: [debounce] %s going towards %d\r\n", config->name, input);
+                    //printf("cbar: [debounce] %s going towards %d\r\n", config->name, input);
                     line->debounce.value = input;
                     line->debounce.timer = 0;
                 } else if (line->debounce.value != line->value) {
@@ -96,7 +96,7 @@ void cbar_recalculate(struct cbar *cbar, int delay)
 
                 if (line->debounce.value != line->value && line->debounce.timer >= timeout) {
                     // Line just stabilized. Register the change.
-                    printf("cbar: [debounce] %s stable at %d\r\n", config->name, input);
+                    //printf("cbar: [debounce] %s stable at %d\r\n", config->name, input);
                     line->value = line->debounce.value;
                 }
             } break;
@@ -108,7 +108,7 @@ void cbar_recalculate(struct cbar *cbar, int delay)
             case CBAR_MONITOR: {
                 int input = cbar->lines[config->monitor.input].value;
                 if (input != line->monitor.previous) {
-                    printf("cbar: [monitor] %s changed to %d\r\n", config->name, input);
+                    //printf("cbar: [monitor] %s changed to %d\r\n", config->name, input);
                     line->value = true;
                     line->monitor.previous = input;
                 }
@@ -144,7 +144,7 @@ void cbar_post(struct cbar *cbar, int id)
     const struct cbar_line_config *config = &cbar->configs[id];
 
     assert(config->type == CBAR_REQUEST);
-    printf("cbar: [request] %s posted\r\n", config->name);
+    //printf("cbar: [request] %s posted\r\n", config->name);
     pthread_mutex_lock(&cbar->mutex);
     line->value = 1;
     pthread_mutex_unlock(&cbar->mutex);
@@ -170,8 +170,8 @@ bool cbar_pending(struct cbar *cbar, int id)
     int value = line->value;
     line->value = 0;
     pthread_mutex_unlock(&cbar->mutex);
-    if (value)
-        printf("cbar: [request] %s pended\r\n", config->name);
+    //if (value)
+    //    printf("cbar: [request] %s pended\r\n", config->name);
 
     return value;
 }

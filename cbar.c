@@ -78,6 +78,10 @@ void cbar_recalculate(struct cbar *cbar, int delay)
                     line->value = (input >= config->threshold.threshold_down);
                 else
                     line->value = (input >= config->threshold.threshold_up);
+
+                /* Swapping the up/down values inverts logic. */
+                if (config->threshold.threshold_up < config->threshold.threshold_down)
+                    line->value = !line->value;
             } break;
             case CBAR_DEBOUNCE: {
                 int input = cbar->lines[config->debounce.input].value;

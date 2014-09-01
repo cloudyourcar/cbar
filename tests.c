@@ -116,6 +116,7 @@ START_TEST(test_cbar_threshold)
         LINE_VOLTAGE,
         LINE_VOLTAGE_OK,
         LINE_VOLTAGE_GE,
+        LINE_VOLTAGE_NOT_OK,
     };
     const struct cbar_line_config configs[] = {
         { "voltage",    CBAR_INPUT },
@@ -123,6 +124,8 @@ START_TEST(test_cbar_threshold)
         { "voltage_ok", CBAR_THRESHOLD, .threshold = { LINE_VOLTAGE, 1050, 950 } },
         /* without hysteresis */
         { "voltage_ge", CBAR_THRESHOLD, .threshold = { LINE_VOLTAGE, 1000, 1000 } },
+        /* inverted logic (active below threshold) */
+        { "voltage_not_ok",  CBAR_THRESHOLD, .threshold = { LINE_VOLTAGE, 950, 1050 } },
         { NULL }
     };
 
@@ -132,30 +135,39 @@ START_TEST(test_cbar_threshold)
     /* initial input state is zero, so the threshold isn't met */
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE), 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), true);
 
     /* set input voltage to not enough, shouldn't budge at all */
     cbar_input(&cbar, LINE_VOLTAGE, 1049);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), true);
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), true);
 
     /* set it high enough, should flip to true */
     cbar_input(&cbar, LINE_VOLTAGE, 1050);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), true);
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), false);
 
     /* set it to lower threshold, should stay high */
     cbar_input(&cbar, LINE_VOLTAGE, 950);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), false);
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), false);
 
     /* set it below lower threshold, should go low again */
     cbar_input(&cbar, LINE_VOLTAGE, 949);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), true);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), false);
     cbar_recalculate(&cbar, 0);
     ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_OK), false);
+    ck_assert_int_eq(cbar_value(&cbar, LINE_VOLTAGE_NOT_OK), true);
 
     /* lack of hysteresis shouldn't cause flapping on constant value */
     cbar_input(&cbar, LINE_VOLTAGE, 1000);

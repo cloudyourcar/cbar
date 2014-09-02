@@ -1,5 +1,7 @@
 # the little crossbar
 
+[![Build Status](https://travis-ci.org/cloudyourcar/cbar.svg?branch=master)](https://travis-ci.org/cloudyourcar/cbar)
+
 ``cbar`` is a little library that makes writing business logic for embedded
 systems much easier.
 

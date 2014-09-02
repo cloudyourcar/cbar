@@ -9,8 +9,8 @@ before_install:
       fi
 install:
     - if [ "$CC" == "gcc" ]; then
-          sudo apt-get install -qq gcc-4.8
-          export CC="gcc-4.8"
+          sudo apt-get install -qq gcc-4.8;
+          export CC="gcc-4.8";
       fi
     - sudo apt-get install check
 script: make test

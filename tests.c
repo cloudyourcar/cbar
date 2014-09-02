@@ -13,6 +13,13 @@
 
 #include "cbar.h"
 
+/* Compatibility corkaround for older versions of Check framework. */
+#ifndef ck_assert_int_ge
+#define ck_assert_int_ge(X, Y) _ck_assert_int(X, >=, Y)
+#endif
+#ifndef ck_assert_int_lt
+#define ck_assert_int_lt(X, Y) _ck_assert_int(X, <, Y)
+#endif
 
 /****************************************************************************/
 

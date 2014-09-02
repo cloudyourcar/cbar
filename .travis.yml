@@ -2,10 +2,5 @@ language: c
 compiler:
     - gcc
     - clang
-# oh dear oh dear. that is an old apple isn't it?
-#install: sudo apt-get install check
-install:
-    - wget http://garr.dl.sourceforge.net/project/check/check/0.9.14/check-0.9.14.tar.gz
-    - tar xf check-0.9.14.tar.gz
-    - "( cd check-0.9.14 && ./configure && make && sudo make install)"
+install: sudo apt-get install check
 script: make test

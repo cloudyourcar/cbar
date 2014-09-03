@@ -15,6 +15,12 @@ install:
     - sudo apt-get install check
 script: make test
 notifications:
-    email:
-        on_success: change
-        on_failure: change
+  email:
+    on_success: change
+    on_failure: change
+  hipchat:
+    format: html
+    template:
+      - "<a href='https://github.com/%{repository}'>%{repository}</a>#<a href='%{build_url}'>%{build_number}</a>: <code><a href='%{compare_url}'>%{commit}</a></code> on <code>%{branch}</code> by %{author} has <a href='%{build_url}'>%{result}</a>."
+    rooms:
+      secure: "ImEc80gcxGBtHNNyBzUYhp1IcyHKAWwkAQwdi+RWXisCRJFfIN/Voy0lMEbFHzpz8RgimLdi0mqoztyf2dfWif1Ldsj5CUwPT9kXbMb2n2mZtK3yOfvISRyuHXiwGTatZyGw754cVKiKAApgGwCP5ufjxAyRvKr/UhyoN43k58w="

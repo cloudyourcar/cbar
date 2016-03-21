@@ -4,8 +4,9 @@
 # the terms of the Do What The Fuck You Want To Public License, Version 2, as
 # published by Sam Hocevar. See the COPYING file for more details.
 
-CFLAGS = -std=c99 -g -Wall -Werror
-LDLIBS = -lcheck
+CFLAGS = -g -Wall -Werror -std=c99
+CFLAGS += -D_GNU_SOURCE
+LDLIBS = -lcheck -lm -lpthread -lrt
 
 all: scan-build test example
 	@echo "+++ All good."""
